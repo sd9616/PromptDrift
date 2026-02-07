@@ -1,0 +1,8 @@
+# Override which model ID to use
+# If this file exists, backend.py can use these overrides instead of per-model .py files.
+# Example: Llama: groq/llama-3.1-8b
+# models:
+#   Claude: claude-3-5-sonnet
+#   Gemini: gemini/gemini-1.5-flash
+#   Deepseek: deepseek/deepseek-chat
+#   Llama: groq/llama-3.1-70b-versatile
