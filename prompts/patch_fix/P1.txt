@@ -1,0 +1,8 @@
+# baseline
+
+Fix the bug in the following code.
+
+Buggy Code:
+{buggy_code}
+
+Return only the corrected code.

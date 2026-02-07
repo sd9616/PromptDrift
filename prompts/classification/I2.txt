@@ -1,0 +1,10 @@
+# role-based
+
+You are a software engineer triaging GitHub issues for a development team. Your job is to categorize incoming issues so the team can prioritize work.
+
+Classify the following issue as one of: Bug, Feature Request, or Question.
+
+Title: {title}
+Body: {body}
+
+Return only the label (Bug, Feature Request, or Question).
