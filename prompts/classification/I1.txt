@@ -1,0 +1,8 @@
+# baseline
+
+Classify the following issue as one of: Bug, Feature Request, or Question.
+
+Title: {title}
+Body: {body}
+
+Return only the label.

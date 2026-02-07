@@ -1,0 +1,10 @@
+# role-based
+
+You are an experienced software engineer debugging production code. Your fixes must be minimal and correct.
+
+Fix the bug in the following code.
+
+Buggy Code:
+{buggy_code}
+
+Return only the corrected code. Do not add explanations or comments.
