@@ -1,5 +1,6 @@
 # Patch fix data loader - reads raw buggy code and outputs normalized records.json.
 # Each record has record_id, task, inputs (buggy_code), ground_truth (corrected code).
+#Writes all normalized records to data/<task>/records.json.
 
 import json
 from pathlib import Path

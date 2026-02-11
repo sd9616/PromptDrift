@@ -1,6 +1,40 @@
 # generate_units.py - Load records and prompts, expand across models/variants/runs,
 # write output/experiment_units.jsonl for run_experiments.py.
 
+# Output format:
+# Classification example:
+# {
+#   "record_id": "issue_123",
+#   "task": "classification",
+#   "prompt_variant": "I1",
+#   "model": "Claude",
+#   "run_index": 1,
+#   "prompt_text": "Classify the following issue as one of: Bug, Feature Request, or Question.\n\nTitle: NullPointerException when config file is missing\nBody: When trying to start the server without a config file...\n\nReturn only the label.",
+#   "ground_truth": "Bug"
+# }
+
+# Summarization example:
+# {
+#   "record_id": "elastic/elasticsearch_37980",
+#   "task": "summarization",
+#   "prompt_variant": "S1",
+#   "model": "Gemini",
+#   "run_index": 1,
+#   "prompt_text": "Summarize the following pull request in a concise paragraph.\n\nDescription: Add support for X and fix Y.\nCommit Messages:\nfix: resolve issue\nfeat: add feature\n\nProvide a brief summary of the main changes.",
+#   "ground_truth": null
+# }
+
+# Patch fix example:
+# {
+#   "record_id": "Lang_1",
+#   "task": "patch_fix",
+#   "prompt_variant": "P1",
+#   "model": "Llama",
+#   "run_index": 1,
+#   "prompt_text": "Fix the bug in the following code.\n\nBuggy Code:\npublic int divide(int a, int b) { return a / b; }\n\nReturn only the corrected code.",
+#   "ground_truth": "public int divide(int a, int b) { if (b == 0) throw new IllegalArgumentException(); return a / b; }"
+# }
+
 import argparse
 import json
 import sys

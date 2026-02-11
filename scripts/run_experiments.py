@@ -1,6 +1,50 @@
 # run_experiments.py - Load experiment units, filter by task/model, call LLM, save results.
 # Reads from output/experiment_units.jsonl by default, writes to output/results.jsonl.
 
+# Output format:
+# Classification example:
+# {
+#   "record_id": "issue_123",
+#   "task": "classification",
+#   "prompt_variant": "I1",
+#   "model": "Claude",
+#   "run_index": 1,
+#   "prompt_text": "Classify the following issue...",
+#   "ground_truth": "Bug",
+#   "output_text": "Bug",
+#   "tokens_used": 12,
+#   "timestamp": "2025-02-07T15:30:00.123456Z",
+#   "experiment_id": "a1b2c3d4e5f6g7h8"
+# }
+# Summarization example:
+# {
+#   "record_id": "elastic/elasticsearch_37980",
+#   "task": "summarization",
+#   "prompt_variant": "S1",
+#   "model": "Gemini",
+#   "run_index": 1,
+#   "prompt_text": "Summarize the following pull request...",
+#   "ground_truth": null,
+#   "output_text": "This PR adds support for X and fixes Y by...",
+#   "tokens_used": 89,
+#   "timestamp": "2025-02-07T15:30:05.789012Z",
+#   "experiment_id": "b2c3d4e5f6g7h8i9"
+# }
+# Patch fix example:
+# {
+#   "record_id": "Lang_1",
+#   "task": "patch_fix",
+#   "prompt_variant": "P1",
+#   "model": "Llama",
+#   "run_index": 1,
+#   "prompt_text": "Fix the bug in the following code...",
+#   "ground_truth": "public int divide(int a, int b) { if (b == 0) throw...",
+#   "output_text": "public int divide(int a, int b) {\n  if (b == 0) throw new IllegalArgumentException();\n  return a / b;\n}",
+#   "tokens_used": 45,
+#   "timestamp": "2025-02-07T15:30:10.345678Z",
+#   "experiment_id": "c3d4e5f6g7h8i9j0"
+# }
+
 import argparse
 import hashlib
 import json
