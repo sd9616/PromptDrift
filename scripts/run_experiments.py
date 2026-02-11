@@ -16,6 +16,7 @@
 #   "timestamp": "2025-02-07T15:30:00.123456Z",
 #   "experiment_id": "a1b2c3d4e5f6g7h8"
 # }
+
 # Summarization example:
 # {
 #   "record_id": "elastic/elasticsearch_37980",
