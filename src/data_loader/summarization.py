@@ -1,5 +1,6 @@
 # Summarization data loader - reads raw PR data and outputs normalized records.json.
 # Each record has record_id, task, inputs (body, cms).
+#Writes all normalized records to data/<task>/records.json.
 
 import json
 from pathlib import Path

@@ -1,5 +1,6 @@
 # Classification data loader - reads raw issue data and outputs normalized records.json.
 # Each record has record_id, task, inputs (title, body), ground_truth (label).
+#Writes all normalized records to data/<task>/records.json.
 
 import json
 from pathlib import Path
