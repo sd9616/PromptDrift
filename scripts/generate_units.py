@@ -44,7 +44,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 TASKS = ["classification", "summarization", "patch_fix"]
 PROMPT_VARIANTS = {
-    "classification": ["I1", "I2"],
+    "classification": ["I1", "I2", "I3"],
     "summarization": ["S1", "S2"],
     "patch_fix": ["P1", "P2"],
 }

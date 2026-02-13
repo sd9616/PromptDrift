@@ -1,0 +1,13 @@
+# contrastive-definitions
+
+Classify the following issue as one of: Bug, Feature Request, or Question.
+
+Use these definitions:
+- Bug: The issue reports something that is broken, incorrect, or not working as expected. It describes existing functionality that fails.
+- Feature Request: The issue proposes new functionality, an enhancement, or a change that does not currently exist. It describes desired behavior, not broken behavior.
+- Question: The issue asks for help, clarification, or information. It does not report a problem or request a change, but seeks understanding.
+
+Title: {title}
+Body: {body}
+
+Return only the label.
