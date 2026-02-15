@@ -1,0 +1,2838 @@
+project,bug_id,file_name,file_content
+Cli,5,org.apache.commons.cli.Util.java,"/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.cli;
+
+/**
+ * Contains useful helper methods for classes within this package.
+ *
+ * @author John Keyes (john at integralsource.com)
+ */
+class Util {
+
+    /**
+     * <p>Remove the hyphens from the begining of <code>str</code> and
+     * return the new String.</p>
+     *
+     * @param str The string from which the hyphens should be removed.
+     *
+     * @return the new String.
+     */
+    static String stripLeadingHyphens(String str)
+    {
+        if (str.startsWith(""--""))
+        {
+            return str.substring(2, str.length());
+        }
+        else if (str.startsWith(""-""))
+        {
+            return str.substring(1, str.length());
+        }
+
+        return str;
+    }
+
+    /**
+     * Remove the leading and trailing quotes from <code>str</code>.
+     * E.g. if str is '""one two""', then 'one two' is returned.
+     *
+     * @param str The string from which the leading and trailing quotes
+     * should be removed.
+     *
+     * @return The string without the leading and trailing quotes.
+     */
+    static String stripLeadingAndTrailingQuotes(String str)
+    {
+        if (str.startsWith(""\"""")) {
+            str = str.substring(1, str.length());
+        }
+        if (str.endsWith(""\"""")) {
+            str = str.substring(0, str.length()-1);
+        }
+        return str;
+    }
+}
+"
+Cli,12,org.apache.commons.cli.GnuParser.java,"/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.cli;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * The class GnuParser provides an implementation of the 
+ * {@link Parser#flatten(Options,String[],boolean) flatten} method.
+ *
+ * @author John Keyes (john at integralsource.com)
+ * @see Parser
+ * @version $Revision$
+ */
+public class GnuParser extends Parser {
+
+    /**
+     * <p>This flatten method does so using the following rules:
+     * <ol>
+     *  <li>If an {@link Option} exists for the first character of 
+     *  the <code>arguments</code> entry <b>AND</b> an {@link Option} 
+     *  does not exist for the whole <code>argument</code> then
+     *  add the first character as an option to the processed tokens
+     *  list e.g. ""-D"" and add the rest of the entry to the also.</li>
+     *  <li>Otherwise just add the token to the processed tokens list.
+     *  </li>
+     * </ol>
+     * </p>
+     *
+     * @param options The Options to parse the arguments by.
+     * @param arguments The arguments that have to be flattened.
+     * @param stopAtNonOption specifies whether to stop 
+     * flattening when a non option has been encountered
+     * @return a String array of the flattened arguments
+     */
+    protected String[] flatten(Options options, String[] arguments, boolean stopAtNonOption)
+    {
+        List tokens = new ArrayList();
+
+        boolean eatTheRest = false;
+
+        for (int i = 0; i < arguments.length; i++)
+        {
+            String arg = arguments[i];
+
+            if (""--"".equals(arg))
+            {
+                eatTheRest = true;
+                tokens.add(""--"");
+            }
+            else if (""-"".equals(arg))
+            {
+                tokens.add(""-"");
+            }
+            else if (arg.startsWith(""-""))
+            {
+                String opt = Util.stripLeadingHyphens(arg);
+
+                if (options.hasOption(opt))
+                {
+                    tokens.add(arg);
+                }
+                else
+                {
+                    if (options.hasOption(arg.substring(0, 2)))
+                    {
+                        // the format is --foo=value or -foo=value
+                        // the format is a special properties option (-Dproperty=value)
+                        tokens.add(arg.substring(0, 2)); // -D
+                        tokens.add(arg.substring(2)); // property=value
+                    }
+                    else
+                    {
+                        eatTheRest = stopAtNonOption;
+                        tokens.add(arg);
+                    }
+                }
+            }
+            else
+            {
+                tokens.add(arg);
+            }
+
+            if (eatTheRest)
+            {
+                for (i++; i < arguments.length; i++)
+                {
+                    tokens.add(arguments[i]);
+                }
+            }
+        }
+
+        return (String[]) tokens.toArray(new String[tokens.size()]);
+    }
+}
+
+"
+Cli,29,org.apache.commons.cli.Util.java,"/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.cli;
+
+/**
+ * Contains useful helper methods for classes within this package.
+ *
+ * @author John Keyes (john at integralsource.com)
+ * @version $Revision$, $Date$
+ */
+class Util
+{
+    /**
+     * Remove the hyphens from the begining of <code>str</code> and
+     * return the new String.
+     *
+     * @param str The string from which the hyphens should be removed.
+     *
+     * @return the new String.
+     */
+    static String stripLeadingHyphens(String str)
+    {
+        if (str == null)
+        {
+            return null;
+        }
+        if (str.startsWith(""--""))
+        {
+            return str.substring(2, str.length());
+        }
+        else if (str.startsWith(""-""))
+        {
+            return str.substring(1, str.length());
+        }
+
+        return str;
+    }
+
+    /**
+     * Remove the leading and trailing quotes from <code>str</code>.
+     * E.g. if str is '""one two""', then 'one two' is returned.
+     *
+     * @param str The string from which the leading and trailing quotes
+     * should be removed.
+     *
+     * @return The string without the leading and trailing quotes.
+     */
+    static String stripLeadingAndTrailingQuotes(String str)
+    {
+        if (str.startsWith(""\""""))
+        {
+            str = str.substring(1, str.length());
+        }
+        int length = str.length();
+        if (str.endsWith(""\""""))
+        {
+            str = str.substring(0, length - 1);
+        }
+        
+        return str;
+    }
+}
+
+"
+Collections,17,org.apache.commons.collections.functors.EqualPredicate.java,"/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.collections.functors;
+
+import static org.apache.commons.collections.functors.NullPredicate.nullPredicate;
+
+import java.io.Serializable;
+
+import org.apache.commons.collections.Predicate;
+
+/**
+ * Predicate implementation that returns true if the input is the same object
+ * as the one stored in this predicate by equals.
+ *
+ * @since 3.0
+ * @version $Id$
+ */
+public final class EqualPredicate<T> implements Predicate<T>, Serializable {
+
+    /** Serial version UID */
+    private static final long serialVersionUID = 5633766978029907089L;
+
+    /** The value to compare to */
+    private final T iValue;
+    
+    /** The equator to use for comparison */
+    private final Equator<T> equator;
+
+    /**
+     * Factory to create the predicate.
+     * 
+     * @param <T> the type that the predicate queries
+     * @param object  the object to compare to
+     * @return the predicate
+     * @throws IllegalArgumentException if the predicate is null
+     */
+    public static <T> Predicate<T> equalPredicate(T object) {
+        if (object == null) {
+            return nullPredicate();
+        }
+        return new EqualPredicate<T>(object);
+    }
+
+    /**
+     * Factory to create the identity predicate.
+     * 
+     * @param <T> the type that the predicate queries
+     * @param object  the object to compare to
+     * @param equator  the equator to use for comparison
+     * @return the predicate
+     * @throws IllegalArgumentException if the predicate is null
+     * @since 4.0
+     */
+    public static <T> Predicate<T> equalPredicate(T object, Equator<T> equator) {
+        if (object == null) {
+            return nullPredicate();
+        }
+        return new EqualPredicate<T>(object, equator);
+    }
+
+    /**
+     * Constructor that performs no validation.
+     * Use <code>getInstance</code> if you want that.
+     * 
+     * @param object  the object to compare to
+     */
+    public EqualPredicate(T object) {
+        // do not use the DefaultEquator to keep backwards compatibility
+        // the DefaultEquator returns also true if the two object references are equal
+        this(object, new DefaultEquator<T>());
+    }
+
+    /**
+     * Constructor that performs no validation.
+     * Use <code>getInstance</code> if you want that.
+     * 
+     * @param object  the object to compare to
+     * @param equator  the equator to use for comparison
+     * @since 4.0
+     */
+    public EqualPredicate(T object, Equator<T> equator) {
+        super();
+        iValue = object;
+        this.equator = equator;
+    }
+
+    /**
+     * Evaluates the predicate returning true if the input equals the stored value.
+     * 
+     * @param object  the input object
+     * @return true if input object equals stored value
+     */
+    public boolean evaluate(T object) {
+            return equator.equate(iValue, object);
+    }
+
+    /**
+     * Gets the value.
+     * 
+     * @return the value
+     * @since 3.1
+     */
+    public Object getValue() {
+        return iValue;
+    }
+
+}
+
+"
+Compress,40,org.apache.commons.compress.utils.BitInputStream.java,"/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * ""License""); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * ""AS IS"" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.commons.compress.utils;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteOrder;
+
+/**
+ * Reads bits from an InputStream.
+ * @since 1.10
+ * @NotThreadSafe
+ */
+public class BitInputStream implements Closeable {
+    private static final int MAXIMUM_CACHE_SIZE = 63; // bits in long minus sign bit
+    private static final long[] MASKS = new long[MAXIMUM_CACHE_SIZE + 1];
+
+    static {
+        for (int i = 1; i <= MAXIMUM_CACHE_SIZE; i++) {
+            MASKS[i] = (MASKS[i - 1] << 1) + 1;
+        }
+    }
+
+    private final InputStream in;
+    private final ByteOrder byteOrder;
+    private long bitsCached = 0;
+    private int bitsCachedSize = 0;
+
+    /**
+     * Constructor taking an InputStream and its bit arrangement. 
+     * @param in the InputStream
+     * @param byteOrder the bit arrangement across byte boundaries,
+     *      either BIG_ENDIAN (aaaaabbb bb000000) or LITTLE_ENDIAN (bbbaaaaa 000000bb)
+     */
+    public BitInputStream(final InputStream in, final ByteOrder byteOrder) {
+        this.in = in;
+        this.byteOrder = byteOrder;
+    }
+    
+    @Override
+    public void close() throws IOException {
+        in.close();
+    }
+    
+    /**
+     * Clears the cache of bits that have been read from the
+     * underlying stream but not yet provided via {@link #readBits}.
+     */
+    public void clearBitCache() {
+        bitsCached = 0;
+        bitsCachedSize = 0;
+    }
+    
+    /**
+     * Returns at most 63 bits read from the underlying stream.
+     *
+     * @param count the number of bits to read, must be a positive
+     * number not bigger than 63.
+     * @return the bits concatenated as a long using the stream's byte order.
+     *         -1 if the end of the underlying stream has been reached before reading
+     *         the requested number of bits
+     * @throws IOException on error
+     */
+    public long readBits(final int count) throws IOException {
+        if (count < 0 || count > MAXIMUM_CACHE_SIZE) {
+            throw new IllegalArgumentException(""count must not be negative or greater than "" + MAXIMUM_CACHE_SIZE);
+        }
+        while (bitsCachedSize < count) {
+            final long nextByte = in.read();
+            if (nextByte < 0) {
+                return nextByte;
+            }
+            if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
+                bitsCached |= (nextByte << bitsCachedSize);
+            } else {
+                bitsCached <<= 8;
+                bitsCached |= nextByte;
+            }
+            bitsCachedSize += 8;
+        }
+            // bitsCachedSize >= 57 and left-shifting it 8 bits would cause an overflow
+        
+        final long bitsOut;
+            if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
+                bitsOut = (bitsCached & MASKS[count]);
+                bitsCached >>>= count;
+            } else {
+                bitsOut = (bitsCached >> (bitsCachedSize - count)) & MASKS[count];
+            }
+            bitsCachedSize -= count;
+        return bitsOut;
+    }
+}
+
+"
+Compress,44,org.apache.commons.compress.utils.ChecksumCalculatingInputStream.java,"/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the ""License""); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an ""AS IS"" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+package org.apache.commons.compress.utils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.Checksum;
+
+/**
+ * A stream that calculates the checksum of the data read.
+ * @NotThreadSafe
+ * @since 1.14
+ */
+public class ChecksumCalculatingInputStream extends InputStream {
+    private final InputStream in;
+    private final Checksum checksum;
+
+    public ChecksumCalculatingInputStream(final Checksum checksum, final InputStream in) {
+
+
+
+        this.checksum = checksum;
+        this.in = in;
+    }
+
+    /**
+     * Reads a single byte from the stream
+     * @throws IOException if the underlying stream throws or the
+     * stream is exhausted and the Checksum doesn't match the expected
+     * value
+     */
+    @Override
+    public int read() throws IOException {
+        final int ret = in.read();
+        if (ret >= 0) {
+            checksum.update(ret);
+        }
+        return ret;
+    }
+
+    /**
+     * Reads a byte array from the stream
+     * @throws IOException if the underlying stream throws or the
+     * stream is exhausted and the Checksum doesn't match the expected
+     * value
+     */
+    @Override
+    public int read(final byte[] b) throws IOException {
+        return read(b, 0, b.length);
+    }
+
+    /**
+     * Reads from the stream into a byte array.
+     * @throws IOException if the underlying stream throws or the
+     * stream is exhausted and the Checksum doesn't match the expected
+     * value
+     */
+    @Override
+    public int read(final byte[] b, final int off, final int len) throws IOException {
+        final int ret = in.read(b, off, len);
+        if (ret >= 0) {
+            checksum.update(b, off, ret);
+        }
+        return ret;
+    }
+
+    @Override
+    public long skip(final long n) throws IOException {
+        // Can't really skip, we have to hash everything to verify the checksum
+        if (read() >= 0) {
+            return 1;
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the calculated checksum.
+     * @return the calculated checksum.
+     */
+    public long getValue() {
+        return checksum.getValue();
+    }
+
+}
+
+"
+JacksonDatabind,9,com.fasterxml.jackson.databind.ser.std.StdKeySerializer.java,"package com.fasterxml.jackson.databind.ser.std;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Date;
+
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
+
+/**
+ * Specialized serializer that can be used as the generic key
+ * serializer, when serializing {@link java.util.Map}s to JSON
+ * Objects.
+ */
+@SuppressWarnings(""serial"")
+public class StdKeySerializer extends StdSerializer<Object>
+{
+    public StdKeySerializer() { super(Object.class); }
+
+    @Override
+    public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+        String str;
+        
+        if (value instanceof Date) {
+            provider.defaultSerializeDateKey((Date) value, jgen);
+            return;
+        } else {
+            str = value.toString();
+        }
+        jgen.writeFieldName(str);
+    }
+
+    @Override
+    public JsonNode getSchema(SerializerProvider provider, Type typeHint) throws JsonMappingException {
+        return createSchemaNode(""string"");
+    }
+
+    @Override
+    public void acceptJsonFormatVisitor(JsonFormatVisitorWrapper visitor, JavaType typeHint) throws JsonMappingException {
+        visitor.expectStringFormat(typeHint);
+    }
+}
+
+"
+JacksonDatabind,16,com.fasterxml.jackson.databind.introspect.AnnotationMap.java,"package com.fasterxml.jackson.databind.introspect;
+
+import java.lang.annotation.Annotation;
+import java.util.*;
+
+import com.fasterxml.jackson.databind.util.Annotations;
+
+/**
+ * Simple helper class used to keep track of collection of
+ * Jackson Annotations associated with annotatable things
+ * (methods, constructors, classes).
+ * Note that only Jackson-owned annotations are tracked (for now?).
+ */
+public final class AnnotationMap implements Annotations
+{
+    protected HashMap<Class<? extends Annotation>,Annotation> _annotations;
+
+    public AnnotationMap() { }
+    
+    private AnnotationMap(HashMap<Class<? extends Annotation>,Annotation> a) {
+        _annotations = a;
+    }
+
+    @SuppressWarnings(""unchecked"")
+    @Override
+    public <A extends Annotation> A get(Class<A> cls)
+    {
+        if (_annotations == null) {
+            return null;
+        }
+        return (A) _annotations.get(cls);
+    }
+
+    /**
+     * @since 2.3
+     */
+    public Iterable<Annotation> annotations() {
+        if (_annotations == null || _annotations.size() == 0) {
+            return Collections.emptyList();
+        }
+        return _annotations.values();
+    }
+    
+    public static AnnotationMap merge(AnnotationMap primary, AnnotationMap secondary)
+    {
+        if (primary == null || primary._annotations == null || primary._annotations.isEmpty()) {
+            return secondary;
+        }
+        if (secondary == null || secondary._annotations == null || secondary._annotations.isEmpty()) {
+            return primary;
+        }
+        HashMap<Class<? extends Annotation>,Annotation> annotations
+            = new HashMap<Class<? extends Annotation>,Annotation>();
+        // add secondary ones first
+        for (Annotation ann : secondary._annotations.values()) {
+            annotations.put(ann.annotationType(), ann);
+        }
+        // to be overridden by primary ones
+        for (Annotation ann : primary._annotations.values()) {
+            annotations.put(ann.annotationType(), ann);
+        }
+        return new AnnotationMap(annotations);
+    }
+    
+    @Override
+    public int size() {
+        return (_annotations == null) ? 0 : _annotations.size();
+    }
+
+    /**
+     * Method called to add specified annotation in the Map, but
+     * only if it didn't yet exist.
+     */
+    public boolean addIfNotPresent(Annotation ann)
+    {
+        if (_annotations == null || !_annotations.containsKey(ann.annotationType())) {
+            _add(ann);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Method called to add specified annotation in the Map.
+     * 
+     * @return True if the addition changed the contents, that is, this map did not
+     *   already have specified annotation
+     */
+    public boolean add(Annotation ann) {
+        return _add(ann);
+    }
+
+    @Override
+    public String toString() {
+        if (_annotations == null) {
+            return ""[null]"";
+        }
+        return _annotations.toString();
+    }
+
+    /*
+    /**********************************************************
+    /* Helper methods
+    /**********************************************************
+     */
+
+    protected final boolean _add(Annotation ann) {
+        if (_annotations == null) {
+            _annotations = new HashMap<Class<? extends Annotation>,Annotation>();
+        }
+        Annotation previous = _annotations.put(ann.annotationType(), ann);
+        return (previous != null) && previous.equals(ann);
+    }
+}
+
+
+
+"
+JacksonDatabind,34,com.fasterxml.jackson.databind.ser.std.NumberSerializer.java,"package com.fasterxml.jackson.databind.ser.std;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.annotation.JacksonStdImpl;
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
+
+/**
+ * As a fallback, we may need to use this serializer for other
+ * types of {@link Number}s: both custom types and ""big"" numbers
+ * like {@link BigInteger} and {@link BigDecimal}.
+ */
+@JacksonStdImpl
+@SuppressWarnings(""serial"")
+public class NumberSerializer
+    extends StdScalarSerializer<Number>
+{
+    /**
+     * Static instance that is only to be used for {@link java.lang.Number}.
+     */
+    public final static NumberSerializer instance = new NumberSerializer(Number.class);
+
+    protected final boolean _isInt;
+
+    /**
+     * @since 2.5
+     */
+    public NumberSerializer(Class<? extends Number> rawType) {
+        super(rawType, false);
+        // since this will NOT be constructed for Integer or Long, only case is:
+        _isInt = (rawType == BigInteger.class);
+    }
+
+    @Override
+    public void serialize(Number value, JsonGenerator g, SerializerProvider provider) throws IOException
+    {
+        // should mostly come in as one of these two:
+        if (value instanceof BigDecimal) {
+            g.writeNumber((BigDecimal) value);
+        } else if (value instanceof BigInteger) {
+            g.writeNumber((BigInteger) value);
+            
+        /* These shouldn't match (as there are more specific ones),
+         * but just to be sure:
+         */
+        } else if (value instanceof Integer) {
+            g.writeNumber(value.intValue());
+        } else if (value instanceof Long) {
+            g.writeNumber(value.longValue());
+        } else if (value instanceof Double) {
+            g.writeNumber(value.doubleValue());
+        } else if (value instanceof Float) {
+            g.writeNumber(value.floatValue());
+        } else if ((value instanceof Byte) || (value instanceof Short)) {
+            g.writeNumber(value.intValue()); // doesn't need to be cast to smaller numbers
+        } else {
+            // We'll have to use fallback ""untyped"" number write method
+            g.writeNumber(value.toString());
+        }
+    }
+
+    @Override
+    public JsonNode getSchema(SerializerProvider provider, Type typeHint) {
+        return createSchemaNode(_isInt ? ""integer"" : ""number"", true);
+    }
+
+    @Override
+    public void acceptJsonFormatVisitor(JsonFormatVisitorWrapper visitor, JavaType typeHint) throws JsonMappingException
+    {
+        if (_isInt) {
+            visitIntFormat(visitor, typeHint, JsonParser.NumberType.BIG_INTEGER);
+        } else {
+            Class<?> h = handledType();
+            if (h == BigDecimal.class) {
+                visitFloatFormat(visitor, typeHint, JsonParser.NumberType.BIG_INTEGER);
+            } else {
+                // otherwise bit unclear what to call... but let's try:
+                /*JsonNumberFormatVisitor v2 =*/ visitor.expectNumberFormat(typeHint);
+            }
+        }
+    }
+}
+"
+JacksonDatabind,39,com.fasterxml.jackson.databind.deser.std.NullifyingDeserializer.java,"package com.fasterxml.jackson.databind.deser.std;
+
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
+
+/**
+ * Bogus deserializer that will simply skip all content there is to map
+ * and returns Java null reference.
+ * 
+ * @since 2.2
+ */
+public class NullifyingDeserializer
+    extends StdDeserializer<Object>
+{
+    private static final long serialVersionUID = 1L;
+
+    public final static NullifyingDeserializer instance = new NullifyingDeserializer();
+    
+    public NullifyingDeserializer() { super(Object.class); }
+
+    /*
+    /**********************************************************
+    /* Deserializer API
+    /**********************************************************
+     */
+    
+    @Override
+    public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException
+    {
+        // 29-Jan-2016, tatu: Simple skipping for all other tokens, but FIELD_NAME bit
+        //    special unfortunately
+            p.skipChildren();
+        return null;
+    }
+
+    @Override
+    public Object deserializeWithType(JsonParser p, DeserializationContext ctxt,
+            TypeDeserializer typeDeserializer) throws IOException
+    {
+        // Not sure if we need to bother but:
+
+        switch (p.getCurrentTokenId()) {
+        case JsonTokenId.ID_START_ARRAY:
+        case JsonTokenId.ID_START_OBJECT:
+        case JsonTokenId.ID_FIELD_NAME:
+            return typeDeserializer.deserializeTypedFromAny(p, ctxt);
+        default:
+            return null;
+        }
+    }
+}
+
+"
+JacksonDatabind,43,com.fasterxml.jackson.databind.deser.impl.ObjectIdValueProperty.java,"package com.fasterxml.jackson.databind.deser.impl;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.deser.*;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
+
+/**
+ * Specialized {@link SettableBeanProperty} implementation used
+ * for virtual property that represents Object Id that is used
+ * for some POJO types (or properties).
+ */
+public final class ObjectIdValueProperty
+    extends SettableBeanProperty
+{
+    private static final long serialVersionUID = 1L;
+
+    protected final ObjectIdReader _objectIdReader;
+
+    public ObjectIdValueProperty(ObjectIdReader objectIdReader,
+            PropertyMetadata metadata)
+    {
+        super(objectIdReader.propertyName, objectIdReader.getIdType(), metadata,
+                objectIdReader.getDeserializer());
+        _objectIdReader = objectIdReader;
+    }
+
+    protected ObjectIdValueProperty(ObjectIdValueProperty src, JsonDeserializer<?> deser)
+    {
+        super(src, deser);
+        _objectIdReader = src._objectIdReader;
+    }
+
+    protected ObjectIdValueProperty(ObjectIdValueProperty src, PropertyName newName) {
+        super(src, newName);
+        _objectIdReader = src._objectIdReader;
+    }
+
+    @Override
+    public ObjectIdValueProperty withName(PropertyName newName) {
+        return new ObjectIdValueProperty(this, newName);
+    }
+
+    @Override
+    public ObjectIdValueProperty withValueDeserializer(JsonDeserializer<?> deser) {
+        return new ObjectIdValueProperty(this, deser);
+    }
+    
+    // // // BeanProperty impl
+    
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> acls) {
+        return null;
+    }
+
+    @Override public AnnotatedMember getMember() {  return null; }
+
+    /*
+    /**********************************************************
+    /* Deserialization methods
+    /**********************************************************
+     */
+
+    @Override
+    public void deserializeAndSet(JsonParser p, DeserializationContext ctxt,
+            Object instance) throws IOException
+    {
+        deserializeSetAndReturn(p, ctxt, instance);
+    }
+
+    @Override
+    public Object deserializeSetAndReturn(JsonParser p,
+    		DeserializationContext ctxt, Object instance) throws IOException
+    {
+        Object id = _valueDeserializer.deserialize(p, ctxt);
+        /* 02-Apr-2015, tatu: Actually, as per [databind#742], let it be;
+         *  missing or null id is needed for some cases, such as cases where id
+         *  will be generated externally, at a later point, and is not available
+         *  quite yet. Typical use case is with DB inserts.
+         */
+        // note: no null checks (unlike usually); deserializer should fail if one found
+        if (id == null) {
+            return null;
+        }
+        ReadableObjectId roid = ctxt.findObjectId(id, _objectIdReader.generator, _objectIdReader.resolver);
+        roid.bindItem(instance);
+        // also: may need to set a property value as well
+        SettableBeanProperty idProp = _objectIdReader.idProperty;
+        if (idProp != null) {
+            return idProp.setAndReturn(instance, id);
+        }
+        return instance;
+    }
+
+    @Override
+    public void set(Object instance, Object value) throws IOException {
+        setAndReturn(instance, value);
+    }
+
+    @Override
+    public Object setAndReturn(Object instance, Object value) throws IOException
+    {
+        SettableBeanProperty idProp = _objectIdReader.idProperty;
+        if (idProp == null) {
+            throw new UnsupportedOperationException(
+                    ""Should not call set() on ObjectIdProperty that has no SettableBeanProperty"");
+        }
+        return idProp.setAndReturn(instance, value);
+    }
+}
+
+"
+JacksonDatabind,49,com.fasterxml.jackson.databind.ser.impl.WritableObjectId.java,"package com.fasterxml.jackson.databind.ser.impl;
+
+import java.io.IOException;
+
+import com.fasterxml.jackson.annotation.ObjectIdGenerator;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.SerializableString;
+
+import com.fasterxml.jackson.databind.SerializerProvider;
+
+/**
+ * Simple value container used to keep track of Object Ids during
+ * serialization.
+ */
+public final class WritableObjectId
+{
+    public final ObjectIdGenerator<?> generator;
+
+    public Object id;
+
+    /**
+     * Marker to denote whether Object Id value has been written as part of an Object,
+     * to be referencible. Remains false when forward-reference is written.
+     */
+    protected boolean idWritten = false;
+
+    public WritableObjectId(ObjectIdGenerator<?> generator) {
+        this.generator = generator;
+    }
+
+    public boolean writeAsId(JsonGenerator gen, SerializerProvider provider, ObjectIdWriter w) throws IOException
+    {
+        if ((id != null) && (idWritten || w.alwaysAsId)) {
+            // 03-Aug-2013, tatu: Prefer Native Object Ids if available
+            if (gen.canWriteObjectId()) {
+                gen.writeObjectRef(String.valueOf(id));
+            } else {
+                w.serializer.serialize(id, gen, provider);
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    public Object generateId(Object forPojo) {
+        // 04-Jun-2016, tatu: As per [databind#1255], need to consider possibility of
+        //    id being generated for ""alwaysAsId"", but not being written as POJO; regardless,
+        //    need to use existing id if there is one:
+            id = generator.generateId(forPojo);
+        return id;
+    }
+
+    /**
+     * Method called to output Object Id as specified.
+     */
+    public void writeAsField(JsonGenerator gen, SerializerProvider provider,
+            ObjectIdWriter w) throws IOException
+    {
+        idWritten = true;
+
+        // 03-Aug-2013, tatu: Prefer Native Object Ids if available
+        if (gen.canWriteObjectId()) {
+            // Need to assume String(ified) ids, for now... could add 'long' variant?
+            gen.writeObjectId(String.valueOf(id));
+            return;
+        }
+        
+        SerializableString name = w.propertyName;
+        if (name != null) {
+            gen.writeFieldName(name);
+            w.serializer.serialize(id, gen, provider);
+        }
+    }
+}
+
+"
+JacksonDatabind,84,com.fasterxml.jackson.databind.type.ResolvedRecursiveType.java,"package com.fasterxml.jackson.databind.type;
+
+import com.fasterxml.jackson.databind.JavaType;
+
+/**
+ * Internal placeholder type used for self-references.
+ *
+ * @since 2.7
+ */
+public class ResolvedRecursiveType extends TypeBase
+{
+    private static final long serialVersionUID = 1L;
+
+    protected JavaType _referencedType;
+
+    public ResolvedRecursiveType(Class<?> erasedType, TypeBindings bindings) {
+        super(erasedType, bindings, null, null, 0, null, null, false);
+    }
+
+    public void setReference(JavaType ref)
+    {
+        // sanity check; should not be called multiple times
+        if (_referencedType != null) {
+            throw new IllegalStateException(""Trying to re-set self reference; old value = ""+_referencedType+"", new = ""+ref);
+        }
+        _referencedType = ref;
+    }
+   
+
+    public JavaType getSelfReferencedType() { return _referencedType; }
+
+    @Override
+    public StringBuilder getGenericSignature(StringBuilder sb) {
+        return _referencedType.getGenericSignature(sb);
+    }
+
+    @Override
+    public StringBuilder getErasedSignature(StringBuilder sb) {
+        return _referencedType.getErasedSignature(sb);
+    }
+
+    @Override
+    public JavaType withContentType(JavaType contentType) {
+        return this;
+    }
+    
+    @Override
+    public JavaType withTypeHandler(Object h) {
+        return this;
+    }
+
+    @Override
+    public JavaType withContentTypeHandler(Object h) {
+        return this;
+    }
+
+    @Override
+    public JavaType withValueHandler(Object h) {
+        return this;
+    }
+
+    @Override
+    public JavaType withContentValueHandler(Object h) {
+        return this;
+    }
+
+    @Override
+    public JavaType withStaticTyping() {
+        return this;
+    }
+
+    @Deprecated // since 2.7
+    @Override
+    protected JavaType _narrow(Class<?> subclass) {
+        return this;
+    }
+
+    @Override
+    public JavaType refine(Class<?> rawType, TypeBindings bindings,
+            JavaType superClass, JavaType[] superInterfaces) {
+        return null;
+    }
+
+    @Override
+    public boolean isContainerType() {
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(40)
+                .append(""[recursive type; "");
+        if (_referencedType == null) {
+            sb.append(""UNRESOLVED"");
+        } else {
+            // [databind#1301]: Typically resolves to a loop so short-cut
+            //   and only include type-erased class
+            sb.append(_referencedType.getRawClass().getName());
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (o == null) return false;
+        // Do NOT ever match unresolved references
+        if (_referencedType == null) {
+            return false;
+        }
+        return (o.getClass() == getClass()
+                && _referencedType.equals(((ResolvedRecursiveType) o).getSelfReferencedType()));
+    }
+}
+
+"
+JacksonDatabind,86,com.fasterxml.jackson.databind.type.ResolvedRecursiveType.java,"package com.fasterxml.jackson.databind.type;
+
+import com.fasterxml.jackson.databind.JavaType;
+
+/**
+ * Internal placeholder type used for self-references.
+ *
+ * @since 2.7
+ */
+public class ResolvedRecursiveType extends TypeBase
+{
+    private static final long serialVersionUID = 1L;
+
+    protected JavaType _referencedType;
+
+    public ResolvedRecursiveType(Class<?> erasedType, TypeBindings bindings) {
+        super(erasedType, bindings, null, null, 0, null, null, false);
+    }
+
+    public void setReference(JavaType ref)
+    {
+        // sanity check; should not be called multiple times
+        if (_referencedType != null) {
+            throw new IllegalStateException(""Trying to re-set self reference; old value = ""+_referencedType+"", new = ""+ref);
+        }
+        _referencedType = ref;
+    }
+   
+
+    public JavaType getSelfReferencedType() { return _referencedType; }
+
+    @Override
+    public StringBuilder getGenericSignature(StringBuilder sb) {
+        return _referencedType.getGenericSignature(sb);
+    }
+
+    @Override
+    public StringBuilder getErasedSignature(StringBuilder sb) {
+        return _referencedType.getErasedSignature(sb);
+    }
+
+    @Override
+    public JavaType withContentType(JavaType contentType) {
+        return this;
+    }
+    
+    @Override
+    public JavaType withTypeHandler(Object h) {
+        return this;
+    }
+
+    @Override
+    public JavaType withContentTypeHandler(Object h) {
+        return this;
+    }
+
+    @Override
+    public JavaType withValueHandler(Object h) {
+        return this;
+    }
+
+    @Override
+    public JavaType withContentValueHandler(Object h) {
+        return this;
+    }
+
+    @Override
+    public JavaType withStaticTyping() {
+        return this;
+    }
+
+    @Deprecated // since 2.7
+    @Override
+    protected JavaType _narrow(Class<?> subclass) {
+        return this;
+    }
+
+    @Override
+    public JavaType refine(Class<?> rawType, TypeBindings bindings,
+            JavaType superClass, JavaType[] superInterfaces) {
+        return null;
+    }
+
+    @Override
+    public boolean isContainerType() {
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(40)
+                .append(""[recursive type; "");
+        if (_referencedType == null) {
+            sb.append(""UNRESOLVED"");
+        } else {
+            // [databind#1301]: Typically resolves to a loop so short-cut
+            //   and only include type-erased class
+            sb.append(_referencedType.getRawClass().getName());
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (o == null) return false;
+        // Do NOT ever match unresolved references
+        if (_referencedType == null) {
+            return false;
+        }
+        return (o.getClass() == getClass()
+                && _referencedType.equals(((ResolvedRecursiveType) o).getSelfReferencedType()));
+    }
+}
+
+"
+JacksonDatabind,105,com.fasterxml.jackson.databind.deser.std.JdkDeserializers.java,"package com.fasterxml.jackson.databind.deser.std;
+
+import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.fasterxml.jackson.databind.*;
+
+/**
+ * Container class that contains serializers for JDK types that
+ * require special handling for some reason.
+ */
+public class JdkDeserializers
+{
+    private final static HashSet<String> _classNames = new HashSet<String>();
+    static {
+        // note: can skip primitive types; other ways to check them:
+        Class<?>[] types = new Class<?>[] {
+                UUID.class,
+                AtomicBoolean.class,
+                StackTraceElement.class,
+                ByteBuffer.class
+        };
+        for (Class<?> cls : types) { _classNames.add(cls.getName()); }
+        for (Class<?> cls : FromStringDeserializer.types()) { _classNames.add(cls.getName()); }
+    }
+
+    public static JsonDeserializer<?> find(Class<?> rawType, String clsName)
+    {
+        if (_classNames.contains(clsName)) {
+            JsonDeserializer<?> d = FromStringDeserializer.findDeserializer(rawType);
+            if (d != null) {
+                return d;
+            }
+            if (rawType == UUID.class) {
+                return new UUIDDeserializer();
+            }
+            if (rawType == StackTraceElement.class) {
+                return new StackTraceElementDeserializer();
+            }
+            if (rawType == AtomicBoolean.class) {
+                // (note: AtomicInteger/Long work due to single-arg constructor. For now?
+                return new AtomicBooleanDeserializer();
+            }
+            if (rawType == ByteBuffer.class) {
+                return new ByteBufferDeserializer();
+            }
+        }
+        return null;
+    }
+}
+
+"
+Jsoup,16,org.jsoup.nodes.DocumentType.java,"package org.jsoup.nodes;
+
+import org.jsoup.helper.StringUtil;
+
+/**
+ * A {@code <!DOCTPYE>} node.
+ */
+public class DocumentType extends Node {
+    // todo: quirk mode from publicId and systemId
+
+    /**
+     * Create a new doctype element.
+     * @param name the doctype's name
+     * @param publicId the doctype's public ID
+     * @param systemId the doctype's system ID
+     * @param baseUri the doctype's base URI
+     */
+    public DocumentType(String name, String publicId, String systemId, String baseUri) {
+        super(baseUri);
+
+        attr(""name"", name);
+        attr(""publicId"", publicId);
+        attr(""systemId"", systemId);
+    }
+
+    @Override
+    public String nodeName() {
+        return ""#doctype"";
+    }
+
+    @Override
+    void outerHtmlHead(StringBuilder accum, int depth, Document.OutputSettings out) {
+        accum.append(""<!DOCTYPE html"");
+        if (!StringUtil.isBlank(attr(""publicId"")))
+            accum.append("" PUBLIC \"""").append(attr(""publicId"")).append(""\"""");
+        if (!StringUtil.isBlank(attr(""systemId"")))
+            accum.append(' ').append(attr(""systemId"")).append(""\"""");
+        accum.append('>');
+    }
+
+    @Override
+    void outerHtmlTail(StringBuilder accum, int depth, Document.OutputSettings out) {
+    }
+}
+
+"
+Jsoup,40,org.jsoup.nodes.DocumentType.java,"package org.jsoup.nodes;
+
+import org.jsoup.helper.StringUtil;
+import org.jsoup.helper.Validate;
+
+/**
+ * A {@code <!DOCTYPE>} node.
+ */
+public class DocumentType extends Node {
+    // todo: quirk mode from publicId and systemId
+
+    /**
+     * Create a new doctype element.
+     * @param name the doctype's name
+     * @param publicId the doctype's public ID
+     * @param systemId the doctype's system ID
+     * @param baseUri the doctype's base URI
+     */
+    public DocumentType(String name, String publicId, String systemId, String baseUri) {
+        super(baseUri);
+
+        Validate.notEmpty(name);
+        attr(""name"", name);
+        attr(""publicId"", publicId);
+        attr(""systemId"", systemId);
+    }
+
+    @Override
+    public String nodeName() {
+        return ""#doctype"";
+    }
+
+    @Override
+    void outerHtmlHead(StringBuilder accum, int depth, Document.OutputSettings out) {
+        accum.append(""<!DOCTYPE"");
+        if (!StringUtil.isBlank(attr(""name"")))
+            accum.append("" "").append(attr(""name""));
+        if (!StringUtil.isBlank(attr(""publicId"")))
+            accum.append("" PUBLIC \"""").append(attr(""publicId"")).append('""');
+        if (!StringUtil.isBlank(attr(""systemId"")))
+            accum.append("" \"""").append(attr(""systemId"")).append('""');
+        accum.append('>');
+    }
+
+    @Override
+    void outerHtmlTail(StringBuilder accum, int depth, Document.OutputSettings out) {
+    }
+}
+
+"
+Jsoup,42,org.jsoup.nodes.FormElement.java,"package org.jsoup.nodes;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.helper.HttpConnection;
+import org.jsoup.helper.Validate;
+import org.jsoup.parser.Tag;
+import org.jsoup.select.Elements;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A HTML Form Element provides ready access to the form fields/controls that are associated with it. It also allows a
+ * form to easily be submitted.
+ */
+public class FormElement extends Element {
+    private final Elements elements = new Elements();
+
+    /**
+     * Create a new, standalone form element.
+     *
+     * @param tag        tag of this element
+     * @param baseUri    the base URI
+     * @param attributes initial attributes
+     */
+    public FormElement(Tag tag, String baseUri, Attributes attributes) {
+        super(tag, baseUri, attributes);
+    }
+
+    /**
+     * Get the list of form control elements associated with this form.
+     * @return form controls associated with this element.
+     */
+    public Elements elements() {
+        return elements;
+    }
+
+    /**
+     * Add a form control element to this form.
+     * @param element form control to add
+     * @return this form element, for chaining
+     */
+    public FormElement addElement(Element element) {
+        elements.add(element);
+        return this;
+    }
+
+    /**
+     * Prepare to submit this form. A Connection object is created with the request set up from the form values. You
+     * can then set up other options (like user-agent, timeout, cookies), then execute it.
+     * @return a connection prepared from the values of this form.
+     * @throws IllegalArgumentException if the form's absolute action URL cannot be determined. Make sure you pass the
+     * document's base URI when parsing.
+     */
+    public Connection submit() {
+        String action = hasAttr(""action"") ? absUrl(""action"") : baseUri();
+        Validate.notEmpty(action, ""Could not determine a form action URL for submit. Ensure you set a base URI when parsing."");
+        Connection.Method method = attr(""method"").toUpperCase().equals(""POST"") ?
+                Connection.Method.POST : Connection.Method.GET;
+
+        Connection con = Jsoup.connect(action)
+                .data(formData())
+                .method(method);
+
+        return con;
+    }
+
+    /**
+     * Get the data that this form submits. The returned list is a copy of the data, and changes to the contents of the
+     * list will not be reflected in the DOM.
+     * @return a list of key vals
+     */
+    public List<Connection.KeyVal> formData() {
+        ArrayList<Connection.KeyVal> data = new ArrayList<Connection.KeyVal>();
+
+        // iterate the form control elements and accumulate their values
+        for (Element el: elements) {
+            if (!el.tag().isFormSubmittable()) continue; // contents are form listable, superset of submitable
+            String name = el.attr(""name"");
+            if (name.length() == 0) continue;
+            String type = el.attr(""type"");
+
+            if (""select"".equals(el.tagName())) {
+                Elements options = el.select(""option[selected]"");
+                boolean set = false;
+                for (Element option: options) {
+                    data.add(HttpConnection.KeyVal.create(name, option.val()));
+                    set = true;
+                }
+                if (!set) {
+                    Element option = el.select(""option"").first();
+                    if (option != null)
+                        data.add(HttpConnection.KeyVal.create(name, option.val()));
+                }
+            } else if (""checkbox"".equalsIgnoreCase(type) || ""radio"".equalsIgnoreCase(type)) {
+                // only add checkbox or radio if they have the checked attribute
+                if (el.hasAttr(""checked"")) {
+                    final String val = el.val();
+                    data.add(HttpConnection.KeyVal.create(name, val));
+                }
+            } else {
+                data.add(HttpConnection.KeyVal.create(name, el.val()));
+            }
+        }
+        return data;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+}
+
+"
+Jsoup,44,org.jsoup.parser.TreeBuilder.java,"package org.jsoup.parser;
+
+import org.jsoup.helper.Validate;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import java.util.ArrayList;
+
+/**
+ * @author Jonathan Hedley
+ */
+abstract class TreeBuilder {
+    CharacterReader reader;
+    Tokeniser tokeniser;
+    protected Document doc; // current doc we are building into
+    protected ArrayList<Element> stack; // the stack of open elements
+    protected String baseUri; // current base uri, for creating new elements
+    protected Token currentToken; // currentToken is used only for error tracking.
+    protected ParseErrorList errors; // null when not tracking errors
+
+    private Token.StartTag start = new Token.StartTag(); // start tag to process
+    private Token.EndTag end  = new Token.EndTag();
+
+    protected void initialiseParse(String input, String baseUri, ParseErrorList errors) {
+        Validate.notNull(input, ""String input must not be null"");
+        Validate.notNull(baseUri, ""BaseURI must not be null"");
+
+        doc = new Document(baseUri);
+        reader = new CharacterReader(input);
+        this.errors = errors;
+        tokeniser = new Tokeniser(reader, errors);
+        stack = new ArrayList<Element>(32);
+        this.baseUri = baseUri;
+    }
+
+    Document parse(String input, String baseUri) {
+        return parse(input, baseUri, ParseErrorList.noTracking());
+    }
+
+    Document parse(String input, String baseUri, ParseErrorList errors) {
+        initialiseParse(input, baseUri, errors);
+        runParser();
+        return doc;
+    }
+
+    protected void runParser() {
+        while (true) {
+            Token token = tokeniser.read();
+            process(token);
+            token.reset();
+
+            if (token.type == Token.TokenType.EOF)
+                break;
+        }
+    }
+
+    protected abstract boolean process(Token token);
+
+    protected boolean processStartTag(String name) {
+        return process(start.reset().name(name));
+    }
+
+    public boolean processStartTag(String name, Attributes attrs) {
+        start.reset();
+        start.nameAttr(name, attrs);
+        return process(start);
+    }
+
+    protected boolean processEndTag(String name) {
+        return process(end.reset().name(name));
+    }
+
+
+    protected Element currentElement() {
+        int size = stack.size();
+        return size > 0 ? stack.get(size-1) : null;
+    }
+}
+
+"
+Jsoup,69,org.jsoup.nodes.FormElement.java,"package org.jsoup.nodes;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.helper.HttpConnection;
+import org.jsoup.helper.Validate;
+import org.jsoup.parser.Tag;
+import org.jsoup.select.Elements;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A HTML Form Element provides ready access to the form fields/controls that are associated with it. It also allows a
+ * form to easily be submitted.
+ */
+public class FormElement extends Element {
+    private final Elements elements = new Elements();
+
+    /**
+     * Create a new, standalone form element.
+     *
+     * @param tag        tag of this element
+     * @param baseUri    the base URI
+     * @param attributes initial attributes
+     */
+    public FormElement(Tag tag, String baseUri, Attributes attributes) {
+        super(tag, baseUri, attributes);
+    }
+
+    /**
+     * Get the list of form control elements associated with this form.
+     * @return form controls associated with this element.
+     */
+    public Elements elements() {
+        return elements;
+    }
+
+    /**
+     * Add a form control element to this form.
+     * @param element form control to add
+     * @return this form element, for chaining
+     */
+    public FormElement addElement(Element element) {
+        elements.add(element);
+        return this;
+    }
+
+
+    /**
+     * Prepare to submit this form. A Connection object is created with the request set up from the form values. You
+     * can then set up other options (like user-agent, timeout, cookies), then execute it.
+     * @return a connection prepared from the values of this form.
+     * @throws IllegalArgumentException if the form's absolute action URL cannot be determined. Make sure you pass the
+     * document's base URI when parsing.
+     */
+    public Connection submit() {
+        String action = hasAttr(""action"") ? absUrl(""action"") : baseUri();
+        Validate.notEmpty(action, ""Could not determine a form action URL for submit. Ensure you set a base URI when parsing."");
+        Connection.Method method = attr(""method"").toUpperCase().equals(""POST"") ?
+                Connection.Method.POST : Connection.Method.GET;
+
+        return Jsoup.connect(action)
+                .data(formData())
+                .method(method);
+    }
+
+    /**
+     * Get the data that this form submits. The returned list is a copy of the data, and changes to the contents of the
+     * list will not be reflected in the DOM.
+     * @return a list of key vals
+     */
+    public List<Connection.KeyVal> formData() {
+        ArrayList<Connection.KeyVal> data = new ArrayList<>();
+
+        // iterate the form control elements and accumulate their values
+        for (Element el: elements) {
+            if (!el.tag().isFormSubmittable()) continue; // contents are form listable, superset of submitable
+            if (el.hasAttr(""disabled"")) continue; // skip disabled form inputs
+            String name = el.attr(""name"");
+            if (name.length() == 0) continue;
+            String type = el.attr(""type"");
+
+            if (""select"".equals(el.tagName())) {
+                Elements options = el.select(""option[selected]"");
+                boolean set = false;
+                for (Element option: options) {
+                    data.add(HttpConnection.KeyVal.create(name, option.val()));
+                    set = true;
+                }
+                if (!set) {
+                    Element option = el.select(""option"").first();
+                    if (option != null)
+                        data.add(HttpConnection.KeyVal.create(name, option.val()));
+                }
+            } else if (""checkbox"".equalsIgnoreCase(type) || ""radio"".equalsIgnoreCase(type)) {
+                // only add checkbox or radio if they have the checked attribute
+                if (el.hasAttr(""checked"")) {
+                    final String val = el.val().length() >  0 ? el.val() : ""on"";
+                    data.add(HttpConnection.KeyVal.create(name, val));
+                }
+            } else {
+                data.add(HttpConnection.KeyVal.create(name, el.val()));
+            }
+        }
+        return data;
+    }
+}
+
+"
+Jsoup,79,org.jsoup.nodes.LeafNode.java,"package org.jsoup.nodes;
+
+import org.jsoup.helper.Validate;
+
+import java.util.List;
+
+abstract class LeafNode extends Node {
+
+    Object value; // either a string value, or an attribute map (in the rare case multiple attributes are set)
+
+    protected final boolean hasAttributes() {
+        return value instanceof Attributes;
+    }
+
+    @Override
+    public final Attributes attributes() {
+        ensureAttributes();
+        return (Attributes) value;
+    }
+
+    private void ensureAttributes() {
+        if (!hasAttributes()) {
+            Object coreValue = value;
+            Attributes attributes = new Attributes();
+            value = attributes;
+            if (coreValue != null)
+                attributes.put(nodeName(), (String) coreValue);
+        }
+    }
+
+    String coreValue() {
+        return attr(nodeName());
+    }
+
+    void coreValue(String value) {
+        attr(nodeName(), value);
+    }
+
+    @Override
+    public String attr(String key) {
+        Validate.notNull(key);
+        if (!hasAttributes()) {
+            return key.equals(nodeName()) ? (String) value : EmptyString;
+        }
+        return super.attr(key);
+    }
+
+    @Override
+    public Node attr(String key, String value) {
+        if (!hasAttributes() && key.equals(nodeName())) {
+            this.value = value;
+        } else {
+            ensureAttributes();
+            super.attr(key, value);
+        }
+        return this;
+    }
+
+    @Override
+    public boolean hasAttr(String key) {
+        ensureAttributes();
+        return super.hasAttr(key);
+    }
+
+    @Override
+    public Node removeAttr(String key) {
+        ensureAttributes();
+        return super.removeAttr(key);
+    }
+
+    @Override
+    public String absUrl(String key) {
+        ensureAttributes();
+        return super.absUrl(key);
+    }
+
+    @Override
+    public String baseUri() {
+        return hasParent() ? parent().baseUri() : """";
+    }
+
+    @Override
+    protected void doSetBaseUri(String baseUri) {
+        // noop
+    }
+
+    @Override
+    public int childNodeSize() {
+        return 0;
+    }
+
+    @Override
+    protected List<Node> ensureChildNodes() {
+        throw new UnsupportedOperationException(""Leaf Nodes do not have child nodes."");
+    }
+}
+
+"
+Jsoup,86,org.jsoup.nodes.Comment.java,"package org.jsoup.nodes;
+
+import org.jsoup.Jsoup;
+import org.jsoup.parser.Parser;
+
+import java.io.IOException;
+
+/**
+ A comment node.
+
+ @author Jonathan Hedley, jonathan@hedley.net */
+public class Comment extends LeafNode {
+    private static final String COMMENT_KEY = ""comment"";
+
+    /**
+     Create a new comment node.
+     @param data The contents of the comment
+     */
+    public Comment(String data) {
+        value = data;
+    }
+
+    /**
+     Create a new comment node.
+     @param data The contents of the comment
+     @param baseUri base URI not used. This is a leaf node.
+     @deprecated
+     */
+    public Comment(String data, String baseUri) {
+        this(data);
+    }
+
+    public String nodeName() {
+        return ""#comment"";
+    }
+
+    /**
+     Get the contents of the comment.
+     @return comment content
+     */
+    public String getData() {
+        return coreValue();
+    }
+
+	void outerHtmlHead(Appendable accum, int depth, Document.OutputSettings out) throws IOException {
+        if (out.prettyPrint())
+            indent(accum, depth, out);
+        accum
+                .append(""<!--"")
+                .append(getData())
+                .append(""-->"");
+    }
+
+	void outerHtmlTail(Appendable accum, int depth, Document.OutputSettings out) {}
+
+    @Override
+    public String toString() {
+        return outerHtml();
+    }
+
+    /**
+     * Check if this comment looks like an XML Declaration.
+     * @return true if it looks like, maybe, it's an XML Declaration.
+     */
+    public boolean isXmlDeclaration() {
+        String data = getData();
+        return (data.length() > 1 && (data.startsWith(""!"") || data.startsWith(""?"")));
+    }
+
+    /**
+     * Attempt to cast this comment to an XML Declaration note.
+     * @return an XML declaration if it could be parsed as one, null otherwise.
+     */
+    public XmlDeclaration asXmlDeclaration() {
+        String data = getData();
+        Document doc = Jsoup.parse(""<"" + data.substring(1, data.length() -1) + "">"", baseUri(), Parser.xmlParser());
+        XmlDeclaration decl = null;
+        if (doc.childNodeSize() > 0) {
+            Element el = doc.child(0);
+            decl = new XmlDeclaration(NodeUtils.parser(doc).settings().normalizeTag(el.tagName()), data.startsWith(""!""));
+            decl.attributes().addAll(el.attributes());
+        }
+        return decl;
+    }
+}
+
+"
+Jsoup,93,org.jsoup.nodes.FormElement.java,"package org.jsoup.nodes;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.helper.HttpConnection;
+import org.jsoup.helper.Validate;
+import org.jsoup.parser.Tag;
+import org.jsoup.select.Elements;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A HTML Form Element provides ready access to the form fields/controls that are associated with it. It also allows a
+ * form to easily be submitted.
+ */
+public class FormElement extends Element {
+    private final Elements elements = new Elements();
+
+    /**
+     * Create a new, standalone form element.
+     *
+     * @param tag        tag of this element
+     * @param baseUri    the base URI
+     * @param attributes initial attributes
+     */
+    public FormElement(Tag tag, String baseUri, Attributes attributes) {
+        super(tag, baseUri, attributes);
+    }
+
+    /**
+     * Get the list of form control elements associated with this form.
+     * @return form controls associated with this element.
+     */
+    public Elements elements() {
+        return elements;
+    }
+
+    /**
+     * Add a form control element to this form.
+     * @param element form control to add
+     * @return this form element, for chaining
+     */
+    public FormElement addElement(Element element) {
+        elements.add(element);
+        return this;
+    }
+
+    @Override
+    protected void removeChild(Node out) {
+        super.removeChild(out);
+        elements.remove(out);
+    }
+
+    /**
+     * Prepare to submit this form. A Connection object is created with the request set up from the form values. You
+     * can then set up other options (like user-agent, timeout, cookies), then execute it.
+     * @return a connection prepared from the values of this form.
+     * @throws IllegalArgumentException if the form's absolute action URL cannot be determined. Make sure you pass the
+     * document's base URI when parsing.
+     */
+    public Connection submit() {
+        String action = hasAttr(""action"") ? absUrl(""action"") : baseUri();
+        Validate.notEmpty(action, ""Could not determine a form action URL for submit. Ensure you set a base URI when parsing."");
+        Connection.Method method = attr(""method"").toUpperCase().equals(""POST"") ?
+                Connection.Method.POST : Connection.Method.GET;
+
+        return Jsoup.connect(action)
+                .data(formData())
+                .method(method);
+    }
+
+    /**
+     * Get the data that this form submits. The returned list is a copy of the data, and changes to the contents of the
+     * list will not be reflected in the DOM.
+     * @return a list of key vals
+     */
+    public List<Connection.KeyVal> formData() {
+        ArrayList<Connection.KeyVal> data = new ArrayList<>();
+
+        // iterate the form control elements and accumulate their values
+        for (Element el: elements) {
+            if (!el.tag().isFormSubmittable()) continue; // contents are form listable, superset of submitable
+            if (el.hasAttr(""disabled"")) continue; // skip disabled form inputs
+            String name = el.attr(""name"");
+            if (name.length() == 0) continue;
+            String type = el.attr(""type"");
+
+
+            if (""select"".equals(el.normalName())) {
+                Elements options = el.select(""option[selected]"");
+                boolean set = false;
+                for (Element option: options) {
+                    data.add(HttpConnection.KeyVal.create(name, option.val()));
+                    set = true;
+                }
+                if (!set) {
+                    Element option = el.select(""option"").first();
+                    if (option != null)
+                        data.add(HttpConnection.KeyVal.create(name, option.val()));
+                }
+            } else if (""checkbox"".equalsIgnoreCase(type) || ""radio"".equalsIgnoreCase(type)) {
+                // only add checkbox or radio if they have the checked attribute
+                if (el.hasAttr(""checked"")) {
+                    final String val = el.val().length() >  0 ? el.val() : ""on"";
+                    data.add(HttpConnection.KeyVal.create(name, val));
+                }
+            } else {
+                data.add(HttpConnection.KeyVal.create(name, el.val()));
+            }
+        }
+        return data;
+    }
+}
+
+"
+JxPath,8,org.apache.commons.jxpath.ri.compiler.CoreOperationRelationalExpression.java,"/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.jxpath.ri.compiler;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import org.apache.commons.jxpath.ri.EvalContext;
+import org.apache.commons.jxpath.ri.InfoSetUtil;
+import org.apache.commons.jxpath.ri.axes.InitialContext;
+import org.apache.commons.jxpath.ri.axes.SelfContext;
+
+/**
+ * Base implementation of Expression for the operations ""&gt;"", ""&gt;="", ""&lt;"", ""&lt;="".
+ * @since JXPath 1.3
+ *
+ * @author Matt Benson
+ * @version $Revision$ $Date$
+ */
+public abstract class CoreOperationRelationalExpression extends CoreOperation {
+
+    protected CoreOperationRelationalExpression(Expression[] args) {
+        super(args);
+    }
+
+    public final Object computeValue(EvalContext context) {
+        return compute(args[0].computeValue(context), args[1]
+                .computeValue(context)) ? Boolean.TRUE : Boolean.FALSE;
+    }
+
+    protected final int getPrecedence() {
+        return 3;
+    }
+
+    protected final boolean isSymmetric() {
+        return false;
+    }
+
+    protected abstract boolean evaluateCompare(int compare);
+
+    private boolean compute(Object left, Object right) {
+        left = reduce(left);
+        right = reduce(right);
+
+        if (left instanceof InitialContext) {
+            ((InitialContext) left).reset();
+        }
+        if (right instanceof InitialContext) {
+            ((InitialContext) right).reset();
+        }
+        if (left instanceof Iterator && right instanceof Iterator) {
+            return findMatch((Iterator) left, (Iterator) right);
+        }
+        if (left instanceof Iterator) {
+            return containsMatch((Iterator) left, right);
+        }
+        if (right instanceof Iterator) {
+            return containsMatch((Iterator) right, left);
+        }
+        double ld = InfoSetUtil.doubleValue(left);
+        double rd = InfoSetUtil.doubleValue(right);
+        return evaluateCompare(ld == rd ? 0 : ld < rd ? -1 : 1);
+    }
+
+    private Object reduce(Object o) {
+        if (o instanceof SelfContext) {
+            o = ((EvalContext) o).getSingleNodePointer();
+        }
+        if (o instanceof Collection) {
+            o = ((Collection) o).iterator();
+        }
+        return o;
+    }
+
+    private boolean containsMatch(Iterator it, Object value) {
+        while (it.hasNext()) {
+            Object element = it.next();
+            if (compute(element, value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean findMatch(Iterator lit, Iterator rit) {
+        HashSet left = new HashSet();
+        while (lit.hasNext()) {
+            left.add(lit.next());
+        }
+        while (rit.hasNext()) {
+            if (containsMatch(left.iterator(), rit.next())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+}
+
+"
+JxPath,10,org.apache.commons.jxpath.ri.compiler.CoreOperationRelationalExpression.java,"/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.jxpath.ri.compiler;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import org.apache.commons.jxpath.ri.EvalContext;
+import org.apache.commons.jxpath.ri.InfoSetUtil;
+import org.apache.commons.jxpath.ri.axes.InitialContext;
+import org.apache.commons.jxpath.ri.axes.SelfContext;
+
+/**
+ * Base implementation of Expression for the operations ""&gt;"", ""&gt;="", ""&lt;"", ""&lt;="".
+ * @since JXPath 1.3
+ *
+ * @author Matt Benson
+ * @version $Revision$ $Date$
+ */
+public abstract class CoreOperationRelationalExpression extends CoreOperation {
+
+    protected CoreOperationRelationalExpression(Expression[] args) {
+        super(args);
+    }
+
+    public final Object computeValue(EvalContext context) {
+        return compute(args[0].computeValue(context), args[1].computeValue(context)) 
+                ? Boolean.TRUE : Boolean.FALSE;
+    }
+
+    protected final int getPrecedence() {
+        return 3;
+    }
+
+    protected final boolean isSymmetric() {
+        return false;
+    }
+
+    protected abstract boolean evaluateCompare(int compare);
+
+    private boolean compute(Object left, Object right) {
+        left = reduce(left);
+        right = reduce(right);
+
+        if (left instanceof InitialContext) {
+            ((InitialContext) left).reset();
+        }
+        if (right instanceof InitialContext) {
+            ((InitialContext) right).reset();
+        }
+        if (left instanceof Iterator && right instanceof Iterator) {
+            return findMatch((Iterator) left, (Iterator) right);
+        }
+        if (left instanceof Iterator) {
+            return containsMatch((Iterator) left, right);
+        }
+        if (right instanceof Iterator) {
+            return containsMatch((Iterator) right, left);
+        }
+        double ld = InfoSetUtil.doubleValue(left);
+        if (Double.isNaN(ld)) {
+            return false;
+        }
+        double rd = InfoSetUtil.doubleValue(right);
+        if (Double.isNaN(rd)) {
+            return false;
+        }
+        return evaluateCompare(ld == rd ? 0 : ld < rd ? -1 : 1);
+    }
+
+    private Object reduce(Object o) {
+        if (o instanceof SelfContext) {
+            o = ((EvalContext) o).getSingleNodePointer();
+        }
+        if (o instanceof Collection) {
+            o = ((Collection) o).iterator();
+        }
+        return o;
+    }
+
+    private boolean containsMatch(Iterator it, Object value) {
+        while (it.hasNext()) {
+            Object element = it.next();
+            if (compute(element, value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean findMatch(Iterator lit, Iterator rit) {
+        HashSet left = new HashSet();
+        while (lit.hasNext()) {
+            left.add(lit.next());
+        }
+        while (rit.hasNext()) {
+            if (containsMatch(left.iterator(), rit.next())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+}
+
+"
+JxPath,15,org.apache.commons.jxpath.ri.axes.UnionContext.java,"/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.jxpath.ri.axes;
+
+import java.util.ArrayList;
+
+import org.apache.commons.jxpath.BasicNodeSet;
+import org.apache.commons.jxpath.ri.EvalContext;
+import org.apache.commons.jxpath.ri.model.NodePointer;
+
+/**
+ * EvalContext that represents a union between other contexts - result
+ * of a union operation like (a | b)
+ *
+ * @author Dmitri Plotnikov
+ * @version $Revision$ $Date$
+ */
+public class UnionContext extends NodeSetContext {
+    private EvalContext contexts[];
+    private boolean prepared;
+
+    public UnionContext(EvalContext parentContext, EvalContext contexts[]) {
+        super(parentContext, new BasicNodeSet());
+        this.contexts = contexts;
+    }
+
+    public int getDocumentOrder() {
+        return contexts.length > 1 ? 1 : super.getDocumentOrder();
+    }
+
+    public boolean setPosition(int position) {
+        if (!prepared) {
+            prepared = true;
+            BasicNodeSet nodeSet = (BasicNodeSet) getNodeSet();
+            ArrayList pointers = new ArrayList();
+            for (int i = 0; i < contexts.length; i++) {
+                EvalContext ctx = (EvalContext) contexts[i];
+                while (ctx.nextSet()) {
+                    while (ctx.nextNode()) {
+                        NodePointer ptr = ctx.getCurrentNodePointer();
+                        if (!pointers.contains(ptr)) {
+                            nodeSet.add(ptr);
+                            pointers.add(ptr);
+                        }
+                    }
+                }
+            }
+        }
+        return super.setPosition(position);
+    }
+}
+
+"
+JxPath,18,org.apache.commons.jxpath.ri.axes.AttributeContext.java,"/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.jxpath.ri.axes;
+
+import org.apache.commons.jxpath.ri.EvalContext;
+import org.apache.commons.jxpath.ri.QName;
+import org.apache.commons.jxpath.ri.compiler.NodeNameTest;
+import org.apache.commons.jxpath.ri.compiler.NodeTest;
+import org.apache.commons.jxpath.ri.model.NodeIterator;
+import org.apache.commons.jxpath.ri.model.NodePointer;
+
+/**
+ * EvalContext that walks the ""attribute::"" axis.
+ *
+ * @author Dmitri Plotnikov
+ * @version $Revision$ $Date$
+ */
+public class AttributeContext extends EvalContext {
+
+    private NodeTest nodeTest;
+    private boolean setStarted = false;
+    private NodeIterator iterator;
+    private NodePointer currentNodePointer;
+
+    /**
+     * @param parentContext represents the previous step on the path
+     * @param nodeTest is the name of the attribute we are looking for
+     */
+    public AttributeContext(EvalContext parentContext, NodeTest nodeTest) {
+        super(parentContext);
+        this.nodeTest = nodeTest;
+    }
+
+    public NodePointer getCurrentNodePointer() {
+        return currentNodePointer;
+    }
+
+    public void reset() {
+        setStarted = false;
+        iterator = null;
+        super.reset();
+    }
+
+    public boolean setPosition(int position) {
+        if (position < getCurrentPosition()) {
+            reset();
+        }
+
+        while (getCurrentPosition() < position) {
+            if (!nextNode()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean nextNode() {
+        super.setPosition(getCurrentPosition() + 1);
+        if (!setStarted) {
+            setStarted = true;
+            if (!(nodeTest instanceof NodeNameTest)) {
+                return false;
+            }
+            QName name = ((NodeNameTest) nodeTest).getNodeName();
+            iterator =
+                parentContext.getCurrentNodePointer().attributeIterator(name);
+        }
+        if (iterator == null) {
+            return false;
+        }
+        if (!iterator.setPosition(iterator.getPosition() + 1)) {
+            return false;
+        }
+        currentNodePointer = iterator.getNodePointer();
+        return true;
+    }
+}
+
+"
+Lang,4,org.apache.commons.lang3.text.translate.LookupTranslator.java,"/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.lang3.text.translate;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.HashMap;
+
+/**
+ * Translates a value using a lookup table.
+ *
+ * @since 3.0
+ * @version $Id$
+ */
+public class LookupTranslator extends CharSequenceTranslator {
+
+    private final HashMap<CharSequence, CharSequence> lookupMap;
+    private final int shortest;
+    private final int longest;
+
+    /**
+     * Define the lookup table to be used in translation
+     *
+     * Note that, as of Lang 3.1, the key to the lookup table is converted to a 
+     * java.lang.String, while the value remains as a java.lang.CharSequence. 
+     * This is because we need the key to support hashCode and equals(Object), 
+     * allowing it to be the key for a HashMap. See LANG-882.
+     *
+     * @param lookup CharSequence[][] table of size [*][2]
+     */
+    public LookupTranslator(final CharSequence[]... lookup) {
+        lookupMap = new HashMap<CharSequence, CharSequence>();
+        int _shortest = Integer.MAX_VALUE;
+        int _longest = 0;
+        if (lookup != null) {
+            for (final CharSequence[] seq : lookup) {
+                this.lookupMap.put(seq[0], seq[1]);
+                final int sz = seq[0].length();
+                if (sz < _shortest) {
+                    _shortest = sz;
+                }
+                if (sz > _longest) {
+                    _longest = sz;
+                }
+            }
+        }
+        shortest = _shortest;
+        longest = _longest;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int translate(final CharSequence input, final int index, final Writer out) throws IOException {
+        int max = longest;
+        if (index + longest > input.length()) {
+            max = input.length() - index;
+        }
+        // descend so as to get a greedy algorithm
+        for (int i = max; i >= shortest; i--) {
+            final CharSequence subSeq = input.subSequence(index, index + i);
+            final CharSequence result = lookupMap.get(subSeq);
+            if (result != null) {
+                out.write(result.toString());
+                return i;
+            }
+        }
+        return 0;
+    }
+}
+
+"
+Lang,19,org.apache.commons.lang3.text.translate.NumericEntityUnescaper.java,"/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.lang3.text.translate;
+
+import java.io.IOException;
+import java.io.Writer;
+
+/**
+ * Translate XML numeric entities of the form &#[xX]?\d+;? to 
+ * the specific codepoint.
+ *
+ * Note that the semi-colon is optional.
+ * 
+ * @since 3.0
+ * @version $Id$
+ */
+public class NumericEntityUnescaper extends CharSequenceTranslator {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int translate(CharSequence input, int index, Writer out) throws IOException {
+        int seqEnd = input.length();
+        // Uses -2 to ensure there is something after the &#
+        if(input.charAt(index) == '&' && index < seqEnd - 1 && input.charAt(index + 1) == '#') {
+            int start = index + 2;
+            boolean isHex = false;
+
+            char firstChar = input.charAt(start);
+            if(firstChar == 'x' || firstChar == 'X') {
+                start++;
+                isHex = true;
+
+                // Check there's more than just an x after the &#
+            }
+
+            int end = start;
+            // Note that this supports character codes without a ; on the end
+            while(input.charAt(end) != ';') 
+            {
+                end++;
+            }
+
+            int entityValue;
+            try {
+                if(isHex) {
+                    entityValue = Integer.parseInt(input.subSequence(start, end).toString(), 16);
+                } else {
+                    entityValue = Integer.parseInt(input.subSequence(start, end).toString(), 10);
+                }
+            } catch(NumberFormatException nfe) {
+            System.err.println(""FAIL: "" + input.subSequence(start, end) + ""["" + start +""][""+ end +""]"");
+                return 0;
+            }
+
+            if(entityValue > 0xFFFF) {
+                char[] chrs = Character.toChars(entityValue);
+                out.write(chrs[0]);
+                out.write(chrs[1]);
+            } else {
+                out.write(entityValue);
+            }
+
+
+            return 2 + (end - start) + (isHex ? 1 : 0) + 1;
+        }
+        return 0;
+    }
+}
+
+"
+Lang,28,org.apache.commons.lang3.text.translate.NumericEntityUnescaper.java,"/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.lang3.text.translate;
+
+import java.io.IOException;
+import java.io.Writer;
+
+/**
+ * Translate XML numeric entities of the form &#[xX]?\d+; to 
+ * the specific codepoint.
+ * 
+ * @author Apache Software Foundation
+ * @since 3.0
+ */
+public class NumericEntityUnescaper extends CharSequenceTranslator {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int translate(CharSequence input, int index, Writer out) throws IOException {
+        // TODO: Protect from ArrayIndexOutOfBounds
+        if(input.charAt(index) == '&' && input.charAt(index + 1) == '#') {
+            int start = index + 2;
+            boolean isHex = false;
+
+            char firstChar = input.charAt(start);
+            if(firstChar == 'x' || firstChar == 'X') {
+                start++;
+                isHex = true;
+            }
+
+            int end = start;
+            while(input.charAt(end) != ';') {
+                end++;
+            }
+
+            int entityValue;
+            try {
+                if(isHex) {
+                    entityValue = Integer.parseInt(input.subSequence(start, end).toString(), 16);
+                } else {
+                    entityValue = Integer.parseInt(input.subSequence(start, end).toString(), 10);
+                }
+            } catch(NumberFormatException nfe) {
+                return 0;
+            }
+
+                out.write(entityValue);
+            return 2 + (end - start) + (isHex ? 1 : 0) + 1;
+        }
+        return 0;
+    }
+}
+
+"
+Math,70,org.apache.commons.math.analysis.solvers.BisectionSolver.java,"/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the ""License""); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an ""AS IS"" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.math.analysis.solvers;
+
+import org.apache.commons.math.FunctionEvaluationException;
+import org.apache.commons.math.MaxIterationsExceededException;
+import org.apache.commons.math.analysis.UnivariateRealFunction;
+
+/**
+ * Implements the <a href=""http://mathworld.wolfram.com/Bisection.html"">
+ * bisection algorithm</a> for finding zeros of univariate real functions.
+ * <p>
+ * The function should be continuous but not necessarily smooth.</p>
+ *
+ * @version $Revision$ $Date$
+ */
+public class BisectionSolver extends UnivariateRealSolverImpl {
+
+    /**
+     * Construct a solver for the given function.
+     *
+     * @param f function to solve.
+     * @deprecated as of 2.0 the function to solve is passed as an argument
+     * to the {@link #solve(UnivariateRealFunction, double, double)} or
+     * {@link UnivariateRealSolverImpl#solve(UnivariateRealFunction, double, double, double)}
+     * method.
+     */
+    @Deprecated
+    public BisectionSolver(UnivariateRealFunction f) {
+        super(f, 100, 1E-6);
+    }
+
+    /**
+     * Construct a solver.
+     *
+     */
+    public BisectionSolver() {
+        super(100, 1E-6);
+    }
+
+    /** {@inheritDoc} */
+    @Deprecated
+    public double solve(double min, double max, double initial)
+        throws MaxIterationsExceededException, FunctionEvaluationException {
+        return solve(f, min, max);
+    }
+
+    /** {@inheritDoc} */
+    @Deprecated
+    public double solve(double min, double max)
+        throws MaxIterationsExceededException, FunctionEvaluationException {
+        return solve(f, min, max);
+    }
+
+    /** {@inheritDoc} */
+    public double solve(final UnivariateRealFunction f, double min, double max, double initial)
+        throws MaxIterationsExceededException, FunctionEvaluationException {
+        return solve(min, max);
+    }
+
+    /** {@inheritDoc} */
+    public double solve(final UnivariateRealFunction f, double min, double max)
+        throws MaxIterationsExceededException, FunctionEvaluationException {
+
+        clearResult();
+        verifyInterval(min,max);
+        double m;
+        double fm;
+        double fmin;
+
+        int i = 0;
+        while (i < maximalIterationCount) {
+            m = UnivariateRealSolverUtils.midpoint(min, max);
+           fmin = f.value(min);
+           fm = f.value(m);
+
+            if (fm * fmin > 0.0) {
+                // max and m bracket the root.
+                min = m;
+            } else {
+                // min and m bracket the root.
+                max = m;
+            }
+
+            if (Math.abs(max - min) <= absoluteAccuracy) {
+                m = UnivariateRealSolverUtils.midpoint(min, max);
+                setResult(m, i);
+                return m;
+            }
+            ++i;
+        }
+
+        throw new MaxIterationsExceededException(maximalIterationCount);
+    }
+}
+
+"
