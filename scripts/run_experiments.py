@@ -50,6 +50,7 @@ import argparse
 import hashlib
 import json
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -137,6 +138,12 @@ def main() -> None:
         type=int,
         help="Max units to run (for testing)",
     )
+    parser.add_argument(
+        "--rate-limit",
+        type=float,
+        default=0,
+        help="Delay in seconds between API calls (e.g., 2.5 for free tier rate limits)",
+    )
     args = parser.parse_args()
 
     # Resolve paths relative to project root
@@ -207,6 +214,10 @@ def main() -> None:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "a") as f:
             f.write(json.dumps(unit) + "\n")
+
+        # Rate limiting delay
+        if args.rate_limit > 0 and i < total - 1:
+            time.sleep(args.rate_limit)
 
     print(f"Done. Results written to {output_path}")
 
