@@ -53,16 +53,22 @@ def generate(prompt_text: str, model: str) -> tuple[str, int]:
     except ImportError:
         raise ImportError("Install litellm: pip install litellm")
 
+    # Claude API does not allow both temperature and top_p
+    kwargs = dict(
+        model=model_id,
+        messages=[{"role": "user", "content": prompt_text}],
+        temperature=TEMPERATURE,
+        max_tokens=MAX_TOKENS,
+    )
+    if model != "Claude":
+        kwargs["top_p"] = TOP_P
+    if model == "Gemini":
+        kwargs["thinking"] = {"type": "enabled", "budget_tokens": 128}
+
     last_error = None
     for attempt in range(RETRY_ATTEMPTS):
         try:
-            response = litellm.completion(
-                model=model_id,
-                messages=[{"role": "user", "content": prompt_text}],
-                temperature=TEMPERATURE,
-                max_tokens=MAX_TOKENS,
-                top_p=TOP_P,
-            )
+            response = litellm.completion(**kwargs)
             output_text = response.choices[0].message.content or ""
             if response.usage and hasattr(response.usage, "total_tokens"):
                 tokens_used = response.usage.total_tokens
