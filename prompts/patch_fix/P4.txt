@@ -1,0 +1,6 @@
+# structured (prompt in bullet points)
+
+• Fix the bug in the following code.
+• Buggy Code:
+  {buggy_code}
+• Return only the corrected code.

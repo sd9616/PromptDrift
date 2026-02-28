@@ -1,4 +1,4 @@
-# Deepseek model config - MODEL_ID and ENV_KEY for LiteLLM.
+# Deepseek model config - MODEL_ID and ENV_KEY for LiteLLM (DeepSeek V3 chat).
 # Used by backend.py to resolve "Deepseek" to the correct model string and API key env var.
 
 MODEL_ID = "deepseek/deepseek-chat"

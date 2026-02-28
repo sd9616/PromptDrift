@@ -1,0 +1,10 @@
+# structured (prompt in bullet points)
+
+• Classify the following issue as one of:
+  • Bug
+  • Feature Request
+  • Question
+• Issue details:
+  • Title: {title}
+  • Body: {body}
+• Return only the label.

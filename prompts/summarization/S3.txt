@@ -1,0 +1,9 @@
+# paraphrased
+
+Read the pull request details and commit messages below. Write a short paragraph that summarizes it.
+
+Description: {body}
+Commit Messages:
+{cms}
+
+Give a brief summary only.

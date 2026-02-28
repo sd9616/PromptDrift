@@ -1,0 +1,8 @@
+# structured (prompt in bullet points)
+
+• Summarize the following pull request in a concise paragraph.
+• Use the following:
+  • Description: {body}
+  • Commit Messages:
+{cms}
+• Provide a brief summary of the main changes.
