@@ -1,0 +1,8 @@
+# paraphrased
+
+Read the issue below and assign it exactly one category: Bug, Feature Request, or Question.
+
+Title: {title}
+Body: {body}
+
+Your response must be only that single label—nothing else.

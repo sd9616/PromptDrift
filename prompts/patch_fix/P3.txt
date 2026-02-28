@@ -1,0 +1,8 @@
+# paraphrased
+
+The code below contains a bug. Produce a corrected version that fixes it.
+
+Buggy Code:
+{buggy_code}
+
+Respond with only the fixed code—no commentary or explanation.
