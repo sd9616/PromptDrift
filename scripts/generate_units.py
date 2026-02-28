@@ -44,9 +44,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 TASKS = ["classification", "summarization", "patch_fix"]
 PROMPT_VARIANTS = {
-    "classification": ["I1", "I2"],
-    "summarization": ["S1", "S2"],
-    "patch_fix": ["P1", "P2"],
+    "classification": ["I1", "I2", "I3", "I4"],
+    "summarization": ["S1", "S2", "S3", "S4"],
+    "patch_fix": ["P1", "P2", "P3", "P4"],
 }
 MODELS = ["Claude", "Gemini", "Deepseek", "Llama"]
 NUM_RUNS = 3
@@ -78,6 +78,18 @@ def fill_prompt(template: str, inputs: dict) -> str:
     for key, value in inputs.items():
         text = text.replace("{" + key + "}", str(value or ""))
     return text
+
+
+def format_cms_as_bullets(cms) -> str:
+    """Format commit messages as one sub-bullet per message (for S4).
+    Supports PRSummarizer format (cms is a list) or newline-separated string."""
+    if cms is None:
+        return ""
+    if isinstance(cms, list):
+        parts = [str(item).strip() for item in cms if str(item).strip()]
+        return "\n".join("  • " + item for item in parts)
+    lines = [line.strip() for line in str(cms).splitlines() if line.strip()]
+    return "\n".join("  • " + line for line in lines)
 
 
 def main() -> None:
@@ -119,7 +131,14 @@ def main() -> None:
                     template = load_prompt(task, variant)
                 except FileNotFoundError:
                     continue
-                prompt_text = fill_prompt(template, inputs)
+                fill_inputs = dict(inputs)
+                if task == "summarization":
+                    cms = inputs.get("cms", "")
+                    if variant == "S4":
+                        fill_inputs["cms"] = format_cms_as_bullets(cms)
+                    elif isinstance(cms, list):
+                        fill_inputs["cms"] = "\n".join(str(m).strip() for m in cms if str(m).strip())
+                prompt_text = fill_prompt(template, fill_inputs)
                 for model in MODELS:
                     for run_index in range(args.runs):
                         units.append({
