@@ -1,4 +1,4 @@
-# Claude model config - MODEL_ID and ENV_KEY for LiteLLM (Anthropic API).
+# Claude model config - MODEL_ID and ENV_KEY for LiteLLM (Anthropic API). Claude Sonnet 4.5.
 # Used by backend.py to resolve "Claude" to the correct model string and API key env var.
 
 MODEL_ID = "claude-sonnet-4-5-20250929" 
