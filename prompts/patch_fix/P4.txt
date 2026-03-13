@@ -1,6 +1,19 @@
 # structured (prompt in bullet points)
 
-• Fix the bug in the following code.
-• Buggy Code:
-  {buggy_code}
-• Return only the corrected code.
+Instruction:
+
+- You are given a bug report URL and the corresponding original files.
+- Fix the bug by rewriting the affected files.
+- Output the complete rewritten content for each modified file.
+- STRICTLY follow the format below for each file.
+- Do NOT add any extra text, explanations, or quotes.
+- Repeat the format separately for multiple files.
+
+Required output format:
+
+ ---FILE_START---
+FILENAME: <full_file_name>
+CONTENT:
+<full file content here>
+---FILE_END---
+

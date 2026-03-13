@@ -1,8 +1,11 @@
-# baseline
+# base
 
-Fix the bug in the following code.
+Given bug report URL and Original files, fix the bug by rewriting the files in original files
 
-Buggy Code:
-{buggy_code}
+STRICTLY follow this format for each file. Do NOT add any extra text, explanations, or quotes. Repeat the format for multiple files.
 
-Return only the corrected code.
+---FILE_START---
+FILENAME: <full_file_name>
+CONTENT:
+<full file content here>
+---FILE_END---

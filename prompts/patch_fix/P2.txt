@@ -1,10 +1,16 @@
 # role-based
 
-You are an experienced software engineer debugging production code. Your fixes must be minimal and correct.
+Assume you are a senior software engineer debugging a production issue.
+Be fully in that role.
 
-Fix the bug in the following code.
+Given the bug report URL and the original files, fix the bug by rewriting the necessary files.
+Return the complete updated content of every modified file using the format below.
 
-Buggy Code:
-{buggy_code}
+STRICTLY follow this format for each file. Do NOT add any extra text, explanations, or quotes. Repeat the format for multiple files.
 
-Return only the corrected code. Do not add explanations or comments.
+
+---FILE_START---
+FILENAME: <full_file_name>
+CONTENT:
+<full file content here>
+---FILE_END---

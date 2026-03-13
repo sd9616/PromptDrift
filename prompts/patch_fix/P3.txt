@@ -1,8 +1,11 @@
 # paraphrased
 
-The code below contains a bug. Produce a corrected version that fixes it.
+Based on the bug report URL and the original files, correct the bug by updating the files.
+STRICTLY follow this format for each file. Do NOT include extra text, explanations, or quotes. Repeat the format for multiple files.
 
-Buggy Code:
-{buggy_code}
+ ---FILE_START---
+FILENAME: <full_file_name>
+CONTENT:
+<full file content here>
+---FILE_END---
 
-Respond with only the fixed code—no commentary or explanation.
