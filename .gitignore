@@ -1,0 +1,9 @@
+*.jsonl
+*.json
+*.xlsx
+*.csv
+*.pdf
+*.png
+# Except for the specific small data/config files we need
+!data/summarization/records.json
+!prompts/**/*.txt
